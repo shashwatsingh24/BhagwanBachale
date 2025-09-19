@@ -1,0 +1,44 @@
+modules = ["nodejs-20"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "expo-dev-server"
+
+[[workflows.workflow]]
+name = "expo-dev-server"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+# 👇 Install ngrok before running expo
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install --save-dev @expo/ngrok@^4.1.0"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx expo start --web --port 5000 --tunnel"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["npx", "serve", "-s", "dist", "-l", "5000"]
+build = ["npx", "expo", "export", "--platform", "web"]
